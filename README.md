@@ -40,6 +40,7 @@ The repository includes implementations of (but is not limited to):
 ## 🛠 Languages Used
 - **C**
 - **C++**
+- **Python**
 
 All programs are written in a **simple, readable, and educational manner** to make learning easier.
 
