@@ -1,0 +1,174 @@
+import time
+from collections import deque
+try:
+    from queue import LifoQueue
+    HAS_QUEUE = True
+except ImportError:
+    HAS_QUEUE = False
+
+def section(title):
+    print(f"\n{'-'*10} {title} {'-'*10}")
+
+def master_stacks():
+    """
+    A comprehensive guide to Stacks:
+    1. The Python List Stack (Simple)
+    2. The Deque Stack (Fast/Professional)
+    3. The Thread-Safe Stack (LifoQueue)
+    4. Real-world Application (Parentheses Balancer)
+    """
+
+    # ==========================================
+    # PART 1: THE NAIVE STACK (Python Lists)
+    # ==========================================
+    section("PART 1: The List Stack (Standard but occasionally slow)")
+    # Python lists have built-in methods that act exactly like a stack.
+    # append() = PUSH
+    # pop()    = POP
+    
+    stack = []
+    
+    # PUSH (Add to top)
+    stack.append("Page 1")
+    stack.append("Page 2")
+    stack.append("Page 3")
+    print(f"Stack after pushes: {stack}")
+    
+    # PEEK (Look at top without removing)
+    # We use index [-1] to see the last item
+    if stack:
+        print(f"Top item (Peek): {stack[-1]}")
+        
+    # POP (Remove from top)
+    removed = stack.pop()
+    print(f"Popped: {removed}")
+    print(f"Stack after pop:  {stack}")
+    
+    # NOTE: Why is this 'naive'?
+    # Lists are dynamic arrays. If the stack grows huge, Python has to 
+    # re-allocate memory and copy everything to a new spot. 
+    # This makes append() mostly O(1), but occasionally O(n).
+
+
+    # ==========================================
+    # PART 2: THE PROFESSIONAL STACK (collections.deque)
+    # ==========================================
+    section("PART 2: The Deque Stack (Optimized O(1))")
+    
+    # 'deque' stands for Double-Ended Queue.
+    # It is implemented as a Doubly Linked List of blocks.
+    # It guarantees O(1) performance for adding/removing from ends.
+    
+    my_stack = deque()
+    
+    # The API is identical to lists
+    my_stack.append(10)
+    my_stack.append(20)
+    my_stack.append(30)
+    
+    print(f"Deque Stack: {my_stack}")
+    print(f"Popped from Deque: {my_stack.pop()}") 
+    
+    # Let's wrap it in a clean Class structure
+    class Stack:
+        def __init__(self):
+            self._container = deque()
+        
+        def push(self, val):
+            self._container.append(val)
+            
+        def pop(self):
+            if self.is_empty():
+                raise IndexError("Pop from empty stack")
+            return self._container.pop()
+        
+        def peek(self):
+            if self.is_empty():
+                return None
+            return self._container[-1]
+        
+        def is_empty(self):
+            return len(self._container) == 0
+        
+        def size(self):
+            return len(self._container)
+        
+        def __repr__(self):
+            return f"Stack({list(self._container)})"
+
+    s = Stack()
+    s.push("Undo 1")
+    s.push("Undo 2")
+    print(f"Custom Class Wrapper: {s}")
+
+
+    # ==========================================
+    # PART 3: THE THREAD-SAFE STACK
+    # ==========================================
+    section("PART 3: LifoQueue (Thread-Safe)")
+    
+    if HAS_QUEUE:
+        # Used in multi-threaded programming where multiple threads
+        # might try to push/pop at the exact same time.
+        # It handles locking automatically.
+        lq = LifoQueue()
+        lq.put("Thread Task 1")
+        lq.put("Thread Task 2")
+        
+        print(f"LifoQueue Item: {lq.get()}") # get() is pop()
+        print("(LifoQueue is slower for single threads due to locking overhead)")
+
+
+    # ==========================================
+    # PART 4: REAL WORLD APPLICATION (Syntax Checker)
+    # ==========================================
+    section("PART 4: Application - Balanced Parentheses")
+    
+    # This is how IDEs know you missed a closing bracket ')'
+    
+    def is_balanced(expression):
+        stack = deque()
+        pairs = {')': '(', '}': '{', ']': '['}
+        
+        for char in expression:
+            if char in "({[":
+                # Opening bracket? Push to stack
+                stack.append(char)
+            elif char in ")}]":
+                # Closing bracket? Check if it matches the top of stack
+                if not stack:
+                    return False # Nothing to match with!
+                
+                top = stack.pop()
+                if top != pairs[char]:
+                    return False # Mismatch (e.g. { matched with ] )
+        
+        # If stack is empty, everything matched perfectly
+        return len(stack) == 0
+
+    test_1 = "{ a + [ b * (c) ] }"
+    test_2 = "{ a + [ b * (c) } ]" # Wrong closing order
+    
+    print(f"Expression: {test_1} -> Balanced? {is_balanced(test_1)}")
+    print(f"Expression: {test_2} -> Balanced? {is_balanced(test_2)}")
+
+    # ==========================================
+    # PART 5: THE INVISIBLE STACK (Recursion)
+    # ==========================================
+    section("PART 5: The Call Stack (Recursion)")
+    
+    # Every time you call a function, Python pushes the function calls onto
+    # the "Call Stack". Recursion abuses this.
+    
+    def recursive_print(n):
+        if n == 0:
+            print("Base case reached! (Top of Stack)")
+            return
+        print(f"Pushing frame {n} onto Call Stack...")
+        recursive_print(n-1)
+        print(f"Popping frame {n} off Call Stack...")
+
+    recursive_print(3)
+
+if __name__ == "__main__":
+    master_stacks()
